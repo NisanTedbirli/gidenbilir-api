@@ -25,6 +25,11 @@ Log.Logger = new LoggerConfiguration()
     .CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Port configuration — Render uses PORT env var
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
     .WriteTo.Console()
@@ -240,13 +245,6 @@ app.UseSerilogRequestLogging();
 app.UseRateLimiter();
 app.UseCors();
 
-// Swagger sadece development
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.UseOutputCache();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -259,12 +257,11 @@ app.MapGet("/", () => Results.Ok(new { message = "GidenBilir API is running", en
 app.MapGet("/health", () => Results.Text("OK"));
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok", timestamp = DateTime.UtcNow }));
 
-// Swagger — production'da da aç
+// Swagger — production'da da aç (test + monitoring için)
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "GidenBilir API v1");
-    c.RoutePrefix = string.Empty; // /swagger yerine / adresinde göster
 });
 
 // Detailed health — sadece development (info leak'i önle)
