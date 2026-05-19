@@ -51,6 +51,8 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
         opts.UseNpgsql(connectionString);
     else
         opts.UseSqlite(connectionString);
+
+    opts.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // JWT — env var override into config (production'da Render/Railway JWT_SECRET kullanır)
