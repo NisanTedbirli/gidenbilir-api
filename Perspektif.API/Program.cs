@@ -252,8 +252,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Root endpoint
+app.MapGet("/", () => Results.Ok(new { message = "GidenBilir API is running", environment = app.Environment.EnvironmentName }));
+
 // Health — public minimal "OK"
 app.MapGet("/health", () => Results.Text("OK"));
+app.MapGet("/api/health", () => Results.Ok(new { status = "ok", timestamp = DateTime.UtcNow }));
+
+// Swagger — production'da da aç
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "GidenBilir API v1");
+    c.RoutePrefix = string.Empty; // /swagger yerine / adresinde göster
+});
 
 // Detailed health — sadece development (info leak'i önle)
 if (app.Environment.IsDevelopment())
