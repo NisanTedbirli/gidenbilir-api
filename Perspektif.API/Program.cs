@@ -202,7 +202,15 @@ if (app.Environment.IsDevelopment() ||
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    try
+    {
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "Migration failed, falling back to EnsureCreated");
+        db.Database.EnsureCreated();
+    }
 }
 
 // Security headers — tüm response'lara
